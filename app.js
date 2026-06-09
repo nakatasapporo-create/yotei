@@ -470,3 +470,134 @@ error
 );
 
 }
+
+// ======================
+// QR読み込み
+// ======================
+
+document
+.getElementById("scanBtn")
+.addEventListener(
+"click",
+startQRScan
+);
+
+async function startQRScan(){
+
+const video =
+document.getElementById(
+"qrVideo"
+);
+
+const stream =
+await navigator.mediaDevices
+.getUserMedia({
+video:{
+facingMode:"environment"
+}
+});
+
+video.srcObject =
+stream;
+
+video.play();
+
+scanFrame(video);
+
+}
+
+function scanFrame(video){
+
+const canvas =
+document.createElement(
+"canvas"
+);
+
+const ctx =
+canvas.getContext("2d");
+
+function tick(){
+
+if(
+video.readyState ===
+video.HAVE_ENOUGH_DATA
+){
+
+canvas.width =
+video.videoWidth;
+
+canvas.height =
+video.videoHeight;
+
+ctx.drawImage(
+video,
+0,
+0
+);
+
+const imageData =
+ctx.getImageData(
+0,
+0,
+canvas.width,
+canvas.height
+);
+
+const code =
+jsQR(
+imageData.data,
+canvas.width,
+canvas.height
+);
+
+if(code){
+
+try{
+
+const imported =
+JSON.parse(
+code.data
+);
+
+schedule =
+imported;
+
+saveSchedule();
+
+renderSchedule();
+
+alert(
+"設定を読み込みました"
+);
+
+video.srcObject
+.getTracks()
+.forEach(
+track =>
+track.stop()
+);
+
+return;
+
+}
+catch(e){
+
+alert(
+"QRデータが正しくありません"
+);
+
+}
+
+}
+
+}
+
+requestAnimationFrame(
+tick
+);
+
+}
+
+tick();
+
+}
