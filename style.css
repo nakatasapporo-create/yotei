@@ -1,0 +1,434 @@
+/* --------------------
+共通
+-------------------- */
+
+*{
+box-sizing:border-box;
+margin:0;
+padding:0;
+}
+
+body{
+
+font-family:
+"Hiragino Sans",
+"Yu Gothic",
+sans-serif;
+
+background:#f5f7fa;
+
+color:#222;
+
+padding:10px;
+
+}
+
+/* --------------------
+ヘッダー
+-------------------- */
+
+header{
+
+background:#4CAF50;
+
+color:white;
+
+padding:20px;
+
+border-radius:15px;
+
+margin-bottom:15px;
+
+text-align:center;
+
+}
+
+h1{
+
+font-size:2.2rem;
+
+}
+
+/* --------------------
+児童画面
+-------------------- */
+
+#studentView{
+
+margin-bottom:30px;
+
+}
+
+/* --------------------
+First Then
+-------------------- */
+
+.now-next{
+
+display:flex;
+
+gap:15px;
+
+margin-bottom:20px;
+
+}
+
+.panel{
+
+flex:1;
+
+}
+
+.panel h2{
+
+font-size:2rem;
+
+text-align:center;
+
+margin-bottom:10px;
+
+}
+
+/* --------------------
+カード
+-------------------- */
+
+.card{
+
+background:white;
+
+border-radius:25px;
+
+padding:15px;
+
+box-shadow:
+0 3px 10px rgba(0,0,0,0.15);
+
+text-align:center;
+
+min-height:320px;
+
+}
+
+.card img{
+
+width:100%;
+
+max-height:220px;
+
+object-fit:contain;
+
+}
+
+.card p{
+
+font-size:2.2rem;
+
+font-weight:bold;
+
+margin-top:15px;
+
+}
+
+/* --------------------
+タイマー
+-------------------- */
+
+#timerSection{
+
+margin:20px 0;
+
+}
+
+#timerBar{
+
+width:100%;
+
+height:35px;
+
+background:#ddd;
+
+border-radius:30px;
+
+overflow:hidden;
+
+}
+
+#timerProgress{
+
+width:100%;
+
+height:100%;
+
+background:#4CAF50;
+
+transition:width 1s linear;
+
+}
+
+#timerText{
+
+font-size:4rem;
+
+font-weight:bold;
+
+text-align:center;
+
+margin-top:10px;
+
+}
+
+/* --------------------
+ボタン
+-------------------- */
+
+#controls{
+
+display:flex;
+
+gap:15px;
+
+justify-content:center;
+
+flex-wrap:wrap;
+
+margin-top:20px;
+
+}
+
+button{
+
+font-size:1.8rem;
+
+padding:18px 30px;
+
+border:none;
+
+border-radius:20px;
+
+cursor:pointer;
+
+min-width:180px;
+
+}
+
+/* スタート */
+
+#startBtn{
+
+background:#4CAF50;
+
+color:white;
+
+}
+
+/* 一時停止 */
+
+#pauseBtn{
+
+background:#FFC107;
+
+color:black;
+
+}
+
+/* 次へ */
+
+#nextBtn{
+
+background:#2196F3;
+
+color:white;
+
+}
+
+/* --------------------
+教員画面
+-------------------- */
+
+#teacherView{
+
+background:white;
+
+padding:20px;
+
+border-radius:20px;
+
+box-shadow:
+0 3px 10px rgba(0,0,0,0.1);
+
+}
+
+#teacherView h2{
+
+font-size:2rem;
+
+margin-bottom:15px;
+
+}
+
+.teacherCard{
+
+margin-bottom:15px;
+
+}
+
+.teacherCard label{
+
+display:block;
+
+font-size:1.2rem;
+
+margin-bottom:5px;
+
+}
+
+.teacherCard input{
+
+width:100%;
+
+padding:12px;
+
+font-size:1.2rem;
+
+border:1px solid #ccc;
+
+border-radius:10px;
+
+}
+
+/* --------------------
+登録ボタン
+-------------------- */
+
+#addCardBtn{
+
+background:#673AB7;
+
+color:white;
+
+width:100%;
+
+padding:18px;
+
+margin-bottom:20px;
+
+}
+
+/* --------------------
+スケジュール一覧
+-------------------- */
+
+#scheduleList{
+
+list-style:none;
+
+margin-top:10px;
+
+}
+
+#scheduleList li{
+
+background:#f0f0f0;
+
+padding:15px;
+
+margin-bottom:10px;
+
+border-radius:10px;
+
+font-size:1.3rem;
+
+cursor:move;
+
+}
+
+/* --------------------
+QR
+-------------------- */
+
+#qrCanvas{
+
+display:block;
+
+margin:20px auto;
+
+background:white;
+
+padding:10px;
+
+border-radius:10px;
+
+}
+
+/* --------------------
+タブレット対応
+-------------------- */
+
+@media (max-width:900px){
+
+.now-next{
+
+flex-direction:column;
+
+}
+
+.card{
+
+min-height:260px;
+
+}
+
+.card p{
+
+font-size:1.8rem;
+
+}
+
+#timerText{
+
+font-size:3rem;
+
+}
+
+button{
+
+font-size:1.5rem;
+
+min-width:140px;
+
+}
+
+}
+
+/* --------------------
+フルスクリーン向け
+-------------------- */
+
+.fullscreen{
+
+height:100vh;
+
+overflow:hidden;
+
+}
+
+/* --------------------
+残り1分
+-------------------- */
+
+.warning{
+
+background:#FFF3CD;
+
+}
+
+/* --------------------
+終了
+-------------------- */
+
+.finished{
+
+background:#FFCDD2;
+
+}

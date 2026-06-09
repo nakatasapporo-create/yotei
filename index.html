@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="ja">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1,
+               user-scalable=no">
+
+<title>みえるスケジュール</title>
+
+<link rel="manifest"
+      href="manifest.json">
+
+<link rel="stylesheet"
+      href="style.css">
+
+<meta name="theme-color"
+   content="#4CAF50">
+
+</head>
+
+<body>
+
+<header>
+
+<h1>
+みえるスケジュール
+</h1>
+
+</header>
+
+<main>
+
+<section id="studentView">
+
+<div class="now-next">
+
+<div class="panel">
+
+<h2>いま</h2>
+
+<div id="currentCard"
+     class="card">
+
+<img id="currentImage"
+  src="cards/ipad.png"
+  alt="現在">
+
+<p id="currentTitle">
+iPad
+</p>
+
+</div>
+
+</div>
+
+<div class="panel">
+
+<h2>つぎ</h2>
+
+<div id="nextCard"
+     class="card">
+
+<img id="nextImage"
+  src="cards/cleanup.png"
+  alt="次">
+
+<p id="nextTitle">
+かたづけ
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<section id="timerSection">
+
+<div id="timerBar">
+
+<div id="timerProgress">
+</div>
+
+</div>
+
+<div id="timerText">
+05:00
+</div>
+
+</section>
+
+<section id="controls">
+
+<button id="startBtn">
+スタート
+</button>
+
+<button id="pauseBtn">
+いったんとめる
+</button>
+
+<button id="nextBtn">
+つぎへ
+</button>
+
+</section>
+
+</section>
+
+<hr>
+
+<section id="teacherView">
+
+<h2>
+せんせいモード
+</h2>
+
+<div class="teacherCard">
+
+<label>
+カード名
+</label>
+
+<input
+type="text"
+id="cardName">
+
+</div>
+
+<div class="teacherCard">
+
+<label>
+時間（分）
+</label>
+
+<input
+type="number"
+id="cardTime"
+value="5">
+
+</div>
+
+<div class="teacherCard">
+
+<label>
+画像
+</label>
+
+<input
+type="file"
+id="imageInput"
+accept="image/*">
+
+</div>
+
+<button id="addCardBtn">
+カード登録
+</button>
+
+<h3>
+スケジュール
+</h3>
+
+<ul id="scheduleList">
+</ul>
+
+<h3>
+QR共有
+</h3>
+
+<canvas id="qrCanvas">
+</canvas>
+
+<button id="exportBtn">
+QR作成
+</button>
+
+</section>
+
+</main>
+
+<script src=
+"https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js">
+</script>
+
+<script src=
+"https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
+</script>
+
+<script src="app.js">
+</script>
+
+</body>
+
+</html>
