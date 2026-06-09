@@ -1,10 +1,18 @@
+/* =================================
+共通
+================================= */
+
 *{
-box-sizing:border-box;
 margin:0;
 padding:0;
+box-sizing:border-box;
 }
 
+html,
 body{
+
+width:100%;
+height:100%;
 
 font-family:
 "Hiragino Sans",
@@ -15,12 +23,22 @@ background:#f5f7fa;
 
 color:#222;
 
-padding:10px;
-
 -webkit-user-select:none;
 user-select:none;
 
+-webkit-touch-callout:none;
+
 }
+
+body{
+
+padding:10px;
+
+}
+
+/* =================================
+ヘッダー
+================================= */
 
 header{
 
@@ -28,21 +46,23 @@ position:relative;
 
 background:#4CAF50;
 
-color:white;
+color:#fff;
 
 padding:20px;
 
-border-radius:15px;
-
-margin-bottom:15px;
+border-radius:16px;
 
 text-align:center;
+
+margin-bottom:15px;
 
 }
 
 h1{
 
-font-size:2.4rem;
+font-size:2.2rem;
+
+font-weight:bold;
 
 }
 
@@ -58,21 +78,25 @@ width:70px;
 
 height:70px;
 
+border:none;
+
+border-radius:50%;
+
+background:#fff;
+
+font-size:2rem;
+
+cursor:pointer;
+
 min-width:70px;
 
 padding:0;
 
-font-size:2rem;
-
-border-radius:50%;
-
-background:white;
-
-color:#333;
-
-border:none;
-
 }
+
+/* =================================
+児童画面
+================================= */
 
 #studentView{
 
@@ -104,20 +128,24 @@ margin-bottom:10px;
 
 }
 
+/* =================================
+カード
+================================= */
+
 .card{
 
-background:white;
+background:#fff;
 
 border-radius:25px;
 
 padding:15px;
 
+min-height:430px;
+
 box-shadow:
-0 3px 10px rgba(0,0,0,0.15);
+0 4px 12px rgba(0,0,0,.15);
 
 text-align:center;
-
-min-height:420px;
 
 }
 
@@ -133,13 +161,17 @@ object-fit:contain;
 
 .card p{
 
-font-size:2.4rem;
+font-size:2.5rem;
 
 font-weight:bold;
 
-margin-top:15px;
+margin-top:10px;
 
 }
+
+/* =================================
+タイマー
+================================= */
 
 #timerSection{
 
@@ -149,13 +181,11 @@ margin-top:20px;
 
 #timerBar{
 
-width:100%;
-
 height:40px;
 
 background:#ddd;
 
-border-radius:30px;
+border-radius:20px;
 
 overflow:hidden;
 
@@ -175,7 +205,7 @@ transition:width 1s linear;
 
 #timerText{
 
-font-size:4.5rem;
+font-size:4rem;
 
 font-weight:bold;
 
@@ -185,21 +215,27 @@ margin-top:10px;
 
 }
 
+/* =================================
+操作ボタン
+================================= */
+
 #controls{
 
 display:flex;
 
 justify-content:center;
 
-gap:20px;
-
-margin-top:20px;
+gap:15px;
 
 flex-wrap:wrap;
 
+margin-top:20px;
+
 }
 
-button{
+#controls button{
+
+min-width:220px;
 
 font-size:2rem;
 
@@ -209,52 +245,59 @@ border:none;
 
 border-radius:20px;
 
-cursor:pointer;
-
-min-width:220px;
-
 font-weight:bold;
+
+cursor:pointer;
 
 }
 
 #startBtn{
 
 background:#4CAF50;
-
-color:white;
+color:#fff;
 
 }
 
 #pauseBtn{
 
 background:#FFC107;
-
-color:black;
+color:#000;
 
 }
 
 #nextBtn{
 
 background:#2196F3;
-
-color:white;
+color:#fff;
 
 }
+
+/* =================================
+教員モード
+================================= */
 
 #teacherView{
 
 display:none;
 
-margin-top:20px;
-
-background:white;
+background:#fff;
 
 padding:20px;
 
 border-radius:20px;
 
 box-shadow:
-0 3px 10px rgba(0,0,0,0.1);
+0 4px 12px rgba(0,0,0,.15);
+
+margin-top:20px;
+
+}
+
+#teacherView h2{
+
+margin-bottom:20px;
+
+font-size:2rem;
 
 }
 
@@ -268,9 +311,9 @@ margin-bottom:15px;
 
 display:block;
 
-margin-bottom:5px;
-
 font-size:1.2rem;
+
+margin-bottom:5px;
 
 }
 
@@ -288,17 +331,45 @@ border-radius:10px;
 
 }
 
+/* =================================
+カード追加
+================================= */
+
 #addCardBtn{
+
+width:100%;
+
+padding:18px;
+
+font-size:1.6rem;
+
+border:none;
+
+border-radius:12px;
 
 background:#673AB7;
 
-color:white;
-
-width:100%;
+color:#fff;
 
 margin-bottom:20px;
 
 }
+
+/* =================================
+説明
+================================= */
+
+.help{
+
+margin-bottom:10px;
+
+color:#666;
+
+}
+
+/* =================================
+リスト
+================================= */
 
 #scheduleList{
 
@@ -314,13 +385,180 @@ padding:15px;
 
 margin-bottom:10px;
 
-border-radius:10px;
+border-radius:12px;
 
 font-size:1.3rem;
 
-cursor:move;
+cursor:grab;
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
 
 }
+
+/* =================================
+教員ボタン
+================================= */
+
+.teacherButtons{
+
+display:flex;
+
+gap:10px;
+
+margin-top:20px;
+
+}
+
+.teacherButtons button{
+
+flex:1;
+
+padding:16px;
+
+border:none;
+
+border-radius:12px;
+
+font-size:1.3rem;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+#resetBtn{
+
+background:#e53935;
+
+color:white;
+
+}
+
+#loadSampleBtn{
+
+background:#009688;
+
+color:white;
+
+}
+
+/* =================================
+パスコード画面
+================================= */
+
+#passwordModal{
+
+display:none;
+
+position:fixed;
+
+top:0;
+left:0;
+
+width:100%;
+height:100%;
+
+background:
+rgba(0,0,0,.6);
+
+justify-content:center;
+
+align-items:center;
+
+z-index:9999;
+
+}
+
+#passwordBox{
+
+background:white;
+
+padding:30px;
+
+border-radius:20px;
+
+width:90%;
+
+max-width:420px;
+
+text-align:center;
+
+}
+
+#passwordBox h2{
+
+margin-bottom:15px;
+
+}
+
+#passwordInput{
+
+width:100%;
+
+padding:18px;
+
+font-size:2rem;
+
+text-align:center;
+
+margin-top:15px;
+
+margin-bottom:20px;
+
+border:2px solid #ccc;
+
+border-radius:12px;
+
+}
+
+.passwordButtons{
+
+display:flex;
+
+gap:10px;
+
+}
+
+.passwordButtons button{
+
+flex:1;
+
+padding:15px;
+
+border:none;
+
+border-radius:12px;
+
+font-size:1.2rem;
+
+font-weight:bold;
+
+}
+
+#passwordOkBtn{
+
+background:#4CAF50;
+
+color:white;
+
+}
+
+#passwordCancelBtn{
+
+background:#999;
+
+color:white;
+
+}
+
+/* =================================
+状態表示
+================================= */
 
 .warning{
 
@@ -334,7 +572,11 @@ background:#FFCDD2;
 
 }
 
-@media(max-width:900px){
+/* =================================
+タブレット縦向き
+================================= */
+
+@media (max-width:900px){
 
 .now-next{
 
@@ -354,20 +596,42 @@ max-height:260px;
 
 }
 
+.card p{
+
+font-size:2rem;
+
+}
+
 #timerText{
 
 font-size:3.5rem;
 
 }
 
-button{
-
-font-size:1.8rem;
-
-padding:20px 30px;
+#controls button{
 
 min-width:180px;
 
+font-size:1.7rem;
+
+padding:18px;
+
 }
+
+}
+
+/* =================================
+ドラッグ中
+================================= */
+
+.sortable-ghost{
+
+opacity:.4;
+
+}
+
+.sortable-chosen{
+
+background:#d9edf7 !important;
 
 }

@@ -9,18 +9,19 @@
 <meta name="viewport"
 content="width=device-width,
 initial-scale=1,
+viewport-fit=cover,
 user-scalable=no">
 
 <title>みえるスケジュール</title>
+
+<meta name="theme-color"
+content="#4CAF50">
 
 <link rel="manifest"
 href="manifest.json">
 
 <link rel="stylesheet"
 href="style.css">
-
-<meta name="theme-color"
-content="#4CAF50">
 
 </head>
 
@@ -32,13 +33,18 @@ content="#4CAF50">
 みえるスケジュール
 </h1>
 
-<button id="settingsBtn">
-⚙️
-</button>
+<button
+id="settingsBtn"
+aria-label="設定">
+⚙️ </button>
 
 </header>
 
 <main>
+
+<!-- =====================
+児童画面
+===================== -->
 
 <section id="studentView">
 
@@ -54,10 +60,11 @@ content="#4CAF50">
 
 <img
 id="currentImage"
-alt="現在">
+src=""
+alt="現在の活動">
 
 <p id="currentTitle">
-活動
+カードなし
 </p>
 
 </div>
@@ -74,10 +81,11 @@ alt="現在">
 
 <img
 id="nextImage"
-alt="次">
+src=""
+alt="次の活動">
 
 <p id="nextTitle">
-つぎ
+-
 </p>
 
 </div>
@@ -104,20 +112,24 @@ alt="次">
 <div id="controls">
 
 <button id="startBtn">
-スタート
+▶ スタート
 </button>
 
 <button id="pauseBtn">
-いったんとめる
+⏸ とめる
 </button>
 
 <button id="nextBtn">
-つぎへ
+➡ つぎへ
 </button>
 
 </div>
 
 </section>
+
+<!-- =====================
+教員モード
+===================== -->
 
 <section id="teacherView">
 
@@ -127,32 +139,35 @@ alt="次">
 
 <div class="teacherCard">
 
-<label>
+<label for="cardName">
 カード名
 </label>
 
 <input
 type="text"
-id="cardName">
+id="cardName"
+placeholder="例：トイレ">
 
 </div>
 
 <div class="teacherCard">
 
-<label>
+<label for="cardTime">
 時間（分）
 </label>
 
 <input
 type="number"
 id="cardTime"
+min="1"
+max="120"
 value="5">
 
 </div>
 
 <div class="teacherCard">
 
-<label>
+<label for="imageInput">
 画像
 </label>
 
@@ -164,21 +179,87 @@ accept="image/*">
 </div>
 
 <button id="addCardBtn">
-カード登録
+カード追加
 </button>
 
+<hr>
+
 <h3>
-スケジュール
+登録済みカード
 </h3>
+
+<p class="help">
+
+ドラッグで順番変更
+
+</p>
 
 <ul id="scheduleList">
 </ul>
+
+<div class="teacherButtons">
+
+<button id="resetBtn">
+全削除
+</button>
+
+<button id="loadSampleBtn">
+初期カード作成
+</button>
+
+</div>
 
 </section>
 
 </main>
 
+<!-- =====================
+パスコード画面
+===================== -->
+
+<div id="passwordModal">
+
+<div id="passwordBox">
+
+<h2>
+せんせいモード
+</h2>
+
+<p>
+4けたのパスコード
+</p>
+
+<input
+type="password"
+inputmode="numeric"
+maxlength="4"
+id="passwordInput">
+
+<div class="passwordButtons">
+
+<button id="passwordOkBtn">
+OK
+</button>
+
+<button id="passwordCancelBtn">
+キャンセル
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- =====================
+ライブラリ
+===================== -->
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+
+<!-- =====================
+アプリ
+===================== -->
 
 <script src="app.js"></script>
 

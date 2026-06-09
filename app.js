@@ -1,6 +1,10 @@
-/* ==========================
-データ
-========================== */
+/* =================================
+みえるスケジュール
+学校実運用版 app.js
+Part1
+================================= */
+
+const TEACHER_PASSWORD = "1234";
 
 let schedule =
 JSON.parse(
@@ -15,10 +19,6 @@ let totalTime = 0;
 
 let remainingTime = 0;
 
-/* ==========================
-起動
-========================== */
-
 window.addEventListener(
 "load",
 init
@@ -26,26 +26,84 @@ init
 
 function init(){
 
+setupButtons();
+
 renderSchedule();
 
-enableSortable();
-
 updateDisplay();
+
+enableSortable();
 
 setupTeacherMode();
 
 }
 
-/* ==========================
-カード登録
-========================== */
+/* =================================
+ボタン
+================================= */
+
+function setupButtons(){
 
 document
 .getElementById("addCardBtn")
-.addEventListener(
+?.addEventListener(
 "click",
 addCard
 );
+
+document
+.getElementById("startBtn")
+?.addEventListener(
+"click",
+startTimer
+);
+
+document
+.getElementById("pauseBtn")
+?.addEventListener(
+"click",
+pauseTimer
+);
+
+document
+.getElementById("nextBtn")
+?.addEventListener(
+"click",
+nextCard
+);
+
+document
+.getElementById("resetBtn")
+?.addEventListener(
+"click",
+resetAll
+);
+
+document
+.getElementById("loadSampleBtn")
+?.addEventListener(
+"click",
+loadSampleCards
+);
+
+}
+
+/* =================================
+保存
+================================= */
+
+function saveSchedule(){
+
+localStorage.setItem(
+"schedule",
+JSON.stringify(schedule)
+);
+
+}
+
+/* =================================
+カード追加
+================================= */
 
 function addCard(){
 
@@ -125,10 +183,6 @@ reader.readAsDataURL(file);
 
 }
 
-/* ==========================
-入力クリア
-========================== */
-
 function clearInputs(){
 
 document.getElementById(
@@ -145,22 +199,9 @@ document.getElementById(
 
 }
 
-/* ==========================
-保存
-========================== */
-
-function saveSchedule(){
-
-localStorage.setItem(
-"schedule",
-JSON.stringify(schedule)
-);
-
-}
-
-/* ==========================
-スケジュール表示
-========================== */
+/* =================================
+一覧表示
+================================= */
 
 function renderSchedule(){
 
@@ -168,6 +209,8 @@ const list =
 document.getElementById(
 "scheduleList"
 );
+
+if(!list) return;
 
 list.innerHTML = "";
 
@@ -177,16 +220,38 @@ schedule.forEach(
 const li =
 document.createElement("li");
 
-li.textContent =
-item.name +
-" (" +
-(item.time/60) +
-"分)";
+li.innerHTML =
 
-li.dataset.index =
-index;
+'<span>' +
+
+item.name +
+
+' (' +
+
+(item.time / 60) +
+
+'分)</span>' +
+
+'<button class="deleteBtn" data-index="' +
+
+index +
+
+'">削除</button>';
 
 list.appendChild(li);
+
+});
+
+document
+.querySelectorAll(
+".deleteBtn"
+)
+.forEach(btn=>{
+
+btn.addEventListener(
+"click",
+deleteCard
+);
 
 });
 
@@ -194,69 +259,217 @@ updateDisplay();
 
 }
 
-/* ==========================
-First Then
-========================== */
+/* =================================
+削除
+================================= */
+
+function deleteCard(e){
+
+const index =
+parseInt(
+e.target.dataset.index
+);
+
+if(
+!confirm(
+"削除しますか？"
+)
+){
+return;
+}
+
+schedule.splice(
+index,
+1
+);
+
+saveSchedule();
+
+renderSchedule();
+
+}
+
+/* =================================
+初期カード
+================================= */
+
+function loadSampleCards(){
+
+if(
+!confirm(
+"初期カードを作成しますか？"
+)
+){
+return;
+}
+
+schedule = [
+
+{
+name:"あさのかい",
+time:300,
+image:""
+},
+
+{
+name:"べんきょう",
+time:900,
+image:""
+},
+
+{
+name:"トイレ",
+time:300,
+image:""
+},
+
+{
+name:"きゅうしょく",
+time:1800,
+image:""
+},
+
+{
+name:"かえりのかい",
+time:300,
+image:""
+}
+
+];
+
+saveSchedule();
+
+renderSchedule();
+
+}
+
+/* =================================
+全削除
+================================= */
+
+function resetAll(){
+
+if(
+!confirm(
+"すべて削除しますか？"
+)
+){
+return;
+}
+
+schedule = [];
+
+currentIndex = 0;
+
+saveSchedule();
+
+renderSchedule();
+
+}
+/* =================================
+First Then表示
+================================= */
 
 function updateDisplay(){
+
+const currentTitle =
+document.getElementById(
+"currentTitle"
+);
+
+const currentImage =
+document.getElementById(
+"currentImage"
+);
+
+const nextTitle =
+document.getElementById(
+"nextTitle"
+);
+
+const nextImage =
+document.getElementById(
+"nextImage"
+);
 
 if(
 schedule.length === 0
 ){
 
-document.getElementById(
-"currentTitle"
-).textContent =
+currentTitle.textContent =
 "カードなし";
 
-document.getElementById(
-"nextTitle"
-).textContent =
-"";
+nextTitle.textContent =
+"-";
+
+currentImage.removeAttribute(
+"src"
+);
+
+nextImage.removeAttribute(
+"src"
+);
 
 return;
+
+}
+
+if(
+currentIndex >=
+schedule.length
+){
+
+currentIndex = 0;
 
 }
 
 const current =
 schedule[currentIndex];
 
-document.getElementById(
-"currentTitle"
-).textContent =
+currentTitle.textContent =
 current.name;
 
-document.getElementById(
-"currentImage"
-).src =
+if(current.image){
+
+currentImage.src =
 current.image;
+
+}else{
+
+currentImage.removeAttribute(
+"src"
+);
+
+}
 
 const next =
 schedule[currentIndex + 1];
 
 if(next){
 
-document.getElementById(
-"nextTitle"
-).textContent =
+nextTitle.textContent =
 next.name;
 
-document.getElementById(
-"nextImage"
-).src =
+if(next.image){
+
+nextImage.src =
 next.image;
+
+}else{
+
+nextImage.removeAttribute(
+"src"
+);
+
+}
 
 }
 else{
 
-document.getElementById(
-"nextTitle"
-).textContent =
+nextTitle.textContent =
 "おわり";
 
-document.getElementById(
-"nextImage"
-).removeAttribute(
+nextImage.removeAttribute(
 "src"
 );
 
@@ -264,22 +477,19 @@ document.getElementById(
 
 }
 
-/* ==========================
+/* =================================
 タイマー
-========================== */
-
-document
-.getElementById("startBtn")
-.addEventListener(
-"click",
-startTimer
-);
+================================= */
 
 function startTimer(){
 
 if(
 schedule.length === 0
 ){
+
+alert(
+"カードがありません"
+);
 
 return;
 
@@ -354,17 +564,6 @@ nextCard();
 
 }
 
-/* ==========================
-一時停止
-========================== */
-
-document
-.getElementById("pauseBtn")
-.addEventListener(
-"click",
-pauseTimer
-);
-
 function pauseTimer(){
 
 clearInterval(
@@ -373,11 +572,17 @@ timerInterval
 
 }
 
-/* ==========================
-タイマー表示
-========================== */
-
 function updateTimer(){
+
+const timerText =
+document.getElementById(
+"timerText"
+);
+
+const timerProgress =
+document.getElementById(
+"timerProgress"
+);
 
 const min =
 Math.floor(
@@ -387,46 +592,57 @@ remainingTime / 60
 const sec =
 remainingTime % 60;
 
-document.getElementById(
-"timerText"
-).textContent =
+timerText.textContent =
+
 String(min)
 .padStart(2,"0")
-+
+
+*
+
 ":"
-+
+
+*
+
 String(sec)
 .padStart(2,"0");
 
 const percent =
+
+totalTime > 0
+
+?
+
 (
 remainingTime /
 totalTime
-) * 100;
+) * 100
 
-document.getElementById(
-"timerProgress"
-).style.width =
+:
+
+100;
+
+timerProgress.style.width =
+
 percent + "%";
 
 }
 
-/* ==========================
+/* =================================
 次へ
-========================== */
-
-document
-.getElementById("nextBtn")
-.addEventListener(
-"click",
-nextCard
-);
+================================= */
 
 function nextCard(){
 
+clearInterval(
+timerInterval
+);
+
 if(
+
 currentIndex <
+
 schedule.length - 1
+
 ){
 
 currentIndex++;
@@ -444,18 +660,20 @@ speak(
 
 }
 
-/* ==========================
-音声
-========================== */
+/* =================================
+音声読み上げ
+================================= */
 
 function speak(text){
 
 if(
-"speechSynthesis"
-in window
+!window.speechSynthesis
 ){
+return;
+}
 
 const msg =
+
 new SpeechSynthesisUtterance(
 text
 );
@@ -463,24 +681,32 @@ text
 msg.lang =
 "ja-JP";
 
+speechSynthesis.cancel();
+
 speechSynthesis.speak(
-msg);
+msg
+);
 
 }
 
-}
-
-/* ==========================
-並び替え
-========================== */
+/* =================================
+ドラッグ並び替え
+================================= */
 
 function enableSortable(){
 
-new Sortable(
-
+const list =
 document.getElementById(
 "scheduleList"
-),
+);
+
+if(!list){
+return;
+}
+
+new Sortable(
+
+list,
 
 {
 
@@ -489,15 +715,23 @@ animation:150,
 onEnd:function(evt){
 
 const moved =
+
 schedule.splice(
+
 evt.oldIndex,
+
 1
+
 )[0];
 
 schedule.splice(
+
 evt.newIndex,
+
 0,
+
 moved
+
 );
 
 saveSchedule();
@@ -512,9 +746,9 @@ renderSchedule();
 
 }
 
-/* ==========================
+/* =================================
 教員モード
-========================== */
+================================= */
 
 function setupTeacherMode(){
 
@@ -523,17 +757,40 @@ document.getElementById(
 "settingsBtn"
 );
 
+const modal =
+document.getElementById(
+"passwordModal"
+);
+
+const passwordInput =
+document.getElementById(
+"passwordInput"
+);
+
+const okBtn =
+document.getElementById(
+"passwordOkBtn"
+);
+
+const cancelBtn =
+document.getElementById(
+"passwordCancelBtn"
+);
+
 const teacherView =
 document.getElementById(
 "teacherView"
 );
 
+if(
+!settingsBtn
+){
+return;
+}
+
 let pressTimer;
 
-settingsBtn.addEventListener(
-"touchstart",
-startPress
-);
+/* 長押し開始 */
 
 settingsBtn.addEventListener(
 "mousedown",
@@ -541,9 +798,11 @@ startPress
 );
 
 settingsBtn.addEventListener(
-"touchend",
-cancelPress
+"touchstart",
+startPress
 );
+
+/* 長押し解除 */
 
 settingsBtn.addEventListener(
 "mouseup",
@@ -555,12 +814,22 @@ settingsBtn.addEventListener(
 cancelPress
 );
 
+settingsBtn.addEventListener(
+"touchend",
+cancelPress
+);
+
 function startPress(){
 
 pressTimer =
 setTimeout(()=>{
 
-toggleTeacherMode();
+modal.style.display =
+"flex";
+
+passwordInput.value = "";
+
+passwordInput.focus();
 
 },3000);
 
@@ -574,11 +843,29 @@ pressTimer
 
 }
 
-function toggleTeacherMode(){
+/* OK */
+
+okBtn.addEventListener(
+"click",
+()=>{
 
 if(
+
+passwordInput.value ===
+
+TEACHER_PASSWORD
+
+){
+
+modal.style.display =
+"none";
+
+if(
+
 teacherView.style.display ===
+
 "block"
+
 ){
 
 teacherView.style.display =
@@ -601,5 +888,59 @@ speak(
 }
 
 }
+else{
+
+alert(
+"パスコードが違います"
+);
+
+passwordInput.value = "";
+
+}
+
+}
+);
+
+/* キャンセル */
+
+cancelBtn.addEventListener(
+"click",
+()=>{
+
+modal.style.display =
+"none";
+
+}
+);
+
+}
+
+/* =================================
+PWA
+================================= */
+
+if(
+
+"serviceWorker"
+
+in navigator
+
+){
+
+window.addEventListener(
+
+"load",
+
+()=>{
+
+navigator.serviceWorker.register(
+
+"./service-worker.js"
+
+);
+
+}
+
+);
 
 }
