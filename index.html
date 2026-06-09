@@ -3,22 +3,24 @@
 <html lang="ja">
 
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport"
-      content="width=device-width,
-               initial-scale=1,
-               user-scalable=no">
+content="width=device-width,
+initial-scale=1,
+user-scalable=no">
 
 <title>みえるスケジュール</title>
 
 <link rel="manifest"
-      href="manifest.json">
+href="manifest.json">
 
 <link rel="stylesheet"
-      href="style.css">
+href="style.css">
 
 <meta name="theme-color"
-   content="#4CAF50">
+content="#4CAF50">
 
 </head>
 
@@ -30,6 +32,10 @@
 みえるスケジュール
 </h1>
 
+<button id="settingsBtn">
+⚙️
+</button>
+
 </header>
 
 <main>
@@ -40,17 +46,18 @@
 
 <div class="panel">
 
-<h2>いま</h2>
+<h2>
+いま
+</h2>
 
-<div id="currentCard"
-     class="card">
+<div class="card">
 
-<img id="currentImage"
-  src="cards/ipad.png"
-  alt="現在">
+<img
+id="currentImage"
+alt="現在">
 
 <p id="currentTitle">
-iPad
+活動
 </p>
 
 </div>
@@ -59,17 +66,18 @@ iPad
 
 <div class="panel">
 
-<h2>つぎ</h2>
+<h2>
+つぎ
+</h2>
 
-<div id="nextCard"
-     class="card">
+<div class="card">
 
-<img id="nextImage"
-  src="cards/cleanup.png"
-  alt="次">
+<img
+id="nextImage"
+alt="次">
 
 <p id="nextTitle">
-かたづけ
+つぎ
 </p>
 
 </div>
@@ -88,12 +96,12 @@ iPad
 </div>
 
 <div id="timerText">
-05:00
+00:00
 </div>
 
 </section>
 
-<section id="controls">
+<div id="controls">
 
 <button id="startBtn">
 スタート
@@ -107,11 +115,9 @@ iPad
 つぎへ
 </button>
 
-</section>
+</div>
 
 </section>
-
-<hr>
 
 <section id="teacherView">
 
@@ -168,45 +174,13 @@ accept="image/*">
 <ul id="scheduleList">
 </ul>
 
-<h3>
-QR共有
-</h3>
-
-<canvas id="qrCanvas">
-</canvas>
-
-<button id="exportBtn">
-QR作成
-</button>
-<h3>QR読み込み</h3>
-
-<video
-id="qrVideo"
-width="300"
-height="220"
-autoplay> </video>
-
-<br>
-
-<button id="scanBtn">
-QRを読み取る
-</button>
-
 </section>
 
 </main>
 
-<script src=
-"https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js">
-</script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 
-<script src=
-"https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
-
-<script src="app.js">
-</script>
+<script src="app.js"></script>
 
 </body>
 

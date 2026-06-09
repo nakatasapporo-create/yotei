@@ -1,6 +1,6 @@
-// ======================
-// データ管理
-// ======================
+/* ==========================
+データ
+========================== */
 
 let schedule =
 JSON.parse(
@@ -12,29 +12,40 @@ let currentIndex = 0;
 let timerInterval = null;
 
 let totalTime = 0;
+
 let remainingTime = 0;
 
-// ======================
-// 初期化
-// ======================
+/* ==========================
+起動
+========================== */
 
-window.onload = () => {
+window.addEventListener(
+"load",
+init
+);
+
+function init(){
 
 renderSchedule();
 
-updateDisplay();
-
 enableSortable();
 
-};
+updateDisplay();
 
-// ======================
-// カード登録
-// ======================
+setupTeacherMode();
+
+}
+
+/* ==========================
+カード登録
+========================== */
 
 document
 .getElementById("addCardBtn")
-.addEventListener("click", addCard);
+.addEventListener(
+"click",
+addCard
+);
 
 function addCard(){
 
@@ -44,7 +55,7 @@ document
 .value
 .trim();
 
-const time =
+const minutes =
 parseInt(
 document
 .getElementById("cardTime")
@@ -56,9 +67,21 @@ document
 .getElementById("imageInput")
 .files[0];
 
-if(!name || !time){
+if(!name){
 
-alert("カード名と時間を入力してください");
+alert(
+"カード名を入力してください"
+);
+
+return;
+
+}
+
+if(!minutes){
+
+alert(
+"時間を入力してください"
+);
 
 return;
 
@@ -66,7 +89,9 @@ return;
 
 if(!file){
 
-alert("画像を選択してください");
+alert(
+"画像を選択してください"
+);
 
 return;
 
@@ -75,13 +100,14 @@ return;
 const reader =
 new FileReader();
 
-reader.onload = function(e){
+reader.onload =
+function(e){
 
 schedule.push({
 
 name:name,
 
-time:time * 60,
+time:minutes * 60,
 
 image:e.target.result
 
@@ -91,15 +117,37 @@ saveSchedule();
 
 renderSchedule();
 
+clearInputs();
+
 };
 
 reader.readAsDataURL(file);
 
 }
 
-// ======================
-// 保存
-// ======================
+/* ==========================
+入力クリア
+========================== */
+
+function clearInputs(){
+
+document.getElementById(
+"cardName"
+).value = "";
+
+document.getElementById(
+"cardTime"
+).value = 5;
+
+document.getElementById(
+"imageInput"
+).value = "";
+
+}
+
+/* ==========================
+保存
+========================== */
 
 function saveSchedule(){
 
@@ -110,9 +158,9 @@ JSON.stringify(schedule)
 
 }
 
-// ======================
-// 一覧表示
-// ======================
+/* ==========================
+スケジュール表示
+========================== */
 
 function renderSchedule(){
 
@@ -123,18 +171,20 @@ document.getElementById(
 
 list.innerHTML = "";
 
-schedule.forEach((item,index)=>{
+schedule.forEach(
+(item,index)=>{
 
 const li =
 document.createElement("li");
 
-li.innerHTML =
+li.textContent =
 item.name +
 " (" +
-(item.time / 60) +
+(item.time/60) +
 "分)";
 
-li.dataset.index = index;
+li.dataset.index =
+index;
 
 list.appendChild(li);
 
@@ -144,13 +194,25 @@ updateDisplay();
 
 }
 
-// ======================
-// First Then表示
-// ======================
+/* ==========================
+First Then
+========================== */
 
 function updateDisplay(){
 
-if(schedule.length === 0){
+if(
+schedule.length === 0
+){
+
+document.getElementById(
+"currentTitle"
+).textContent =
+"カードなし";
+
+document.getElementById(
+"nextTitle"
+).textContent =
+"";
 
 return;
 
@@ -158,9 +220,6 @@ return;
 
 const current =
 schedule[currentIndex];
-
-const next =
-schedule[currentIndex + 1];
 
 document.getElementById(
 "currentTitle"
@@ -171,6 +230,9 @@ document.getElementById(
 "currentImage"
 ).src =
 current.image;
+
+const next =
+schedule[currentIndex + 1];
 
 if(next){
 
@@ -184,20 +246,27 @@ document.getElementById(
 ).src =
 next.image;
 
-}else{
+}
+else{
 
 document.getElementById(
 "nextTitle"
 ).textContent =
 "おわり";
 
-}
+document.getElementById(
+"nextImage"
+).removeAttribute(
+"src"
+);
 
 }
 
-// ======================
-// タイマー
-// ======================
+}
+
+/* ==========================
+タイマー
+========================== */
 
 document
 .getElementById("startBtn")
@@ -208,7 +277,9 @@ startTimer
 
 function startTimer(){
 
-if(schedule.length===0){
+if(
+schedule.length === 0
+){
 
 return;
 
@@ -224,6 +295,8 @@ schedule[currentIndex].time;
 remainingTime =
 totalTime;
 
+updateTimer();
+
 timerInterval =
 setInterval(()=>{
 
@@ -235,12 +308,12 @@ if(
 remainingTime === 60
 ){
 
-speak(
-"あと1分です"
-);
-
 document.body.classList.add(
 "warning"
+);
+
+speak(
+"あと1分です"
 );
 
 }
@@ -253,10 +326,6 @@ clearInterval(
 timerInterval
 );
 
-speak(
-"おしまいです"
-);
-
 document.body.classList.remove(
 "warning"
 );
@@ -265,7 +334,19 @@ document.body.classList.add(
 "finished"
 );
 
+speak(
+"おしまいです"
+);
+
+setTimeout(()=>{
+
+document.body.classList.remove(
+"finished"
+);
+
 nextCard();
+
+},1500);
 
 }
 
@@ -273,9 +354,28 @@ nextCard();
 
 }
 
-// ======================
-// タイマー表示
-// ======================
+/* ==========================
+一時停止
+========================== */
+
+document
+.getElementById("pauseBtn")
+.addEventListener(
+"click",
+pauseTimer
+);
+
+function pauseTimer(){
+
+clearInterval(
+timerInterval
+);
+
+}
+
+/* ==========================
+タイマー表示
+========================== */
 
 function updateTimer(){
 
@@ -302,9 +402,7 @@ const percent =
 (
 remainingTime /
 totalTime
-)
-*
-100;
+) * 100;
 
 document.getElementById(
 "timerProgress"
@@ -313,9 +411,9 @@ percent + "%";
 
 }
 
-// ======================
-// 次へ
-// ======================
+/* ==========================
+次へ
+========================== */
 
 document
 .getElementById("nextBtn")
@@ -325,10 +423,6 @@ nextCard
 );
 
 function nextCard(){
-
-document.body.classList.remove(
-"finished"
-);
 
 if(
 currentIndex <
@@ -340,29 +434,19 @@ currentIndex++;
 updateDisplay();
 
 }
+else{
 
-}
-
-// ======================
-// 一時停止
-// ======================
-
-document
-.getElementById("pauseBtn")
-.addEventListener(
-"click",
-()=>{
-
-clearInterval(
-timerInterval
+speak(
+"すべておわりました"
 );
 
 }
-);
 
-// ======================
-// 音声
-// ======================
+}
+
+/* ==========================
+音声
+========================== */
 
 function speak(text){
 
@@ -380,16 +464,15 @@ msg.lang =
 "ja-JP";
 
 speechSynthesis.speak(
-msg
-);
+msg);
 
 }
 
 }
 
-// ======================
-// 並び替え
-// ======================
+/* ==========================
+並び替え
+========================== */
 
 function enableSortable(){
 
@@ -429,175 +512,94 @@ renderSchedule();
 
 }
 
-// ======================
-// QRコード
-// ======================
+/* ==========================
+教員モード
+========================== */
 
-document
-.getElementById("exportBtn")
-.addEventListener(
-"click",
-createQR
-);
+function setupTeacherMode(){
 
-function createQR(){
-
-const canvas =
+const settingsBtn =
 document.getElementById(
-"qrCanvas"
+"settingsBtn"
 );
 
-QRCode.toCanvas(
-
-canvas,
-
-JSON.stringify(
-schedule
-),
-
-function(error){
-
-if(error){
-
-console.error(
-error
-);
-
-}
-
-}
-
-);
-
-}
-
-// ======================
-// QR読み込み
-// ======================
-
-document
-.getElementById("scanBtn")
-.addEventListener(
-"click",
-startQRScan
-);
-
-async function startQRScan(){
-
-const video =
+const teacherView =
 document.getElementById(
-"qrVideo"
+"teacherView"
 );
 
-const stream =
-await navigator.mediaDevices
-.getUserMedia({
-video:{
-facingMode:"environment"
-}
-});
+let pressTimer;
 
-video.srcObject =
-stream;
-
-video.play();
-
-scanFrame(video);
-
-}
-
-function scanFrame(video){
-
-const canvas =
-document.createElement(
-"canvas"
+settingsBtn.addEventListener(
+"touchstart",
+startPress
 );
 
-const ctx =
-canvas.getContext("2d");
+settingsBtn.addEventListener(
+"mousedown",
+startPress
+);
 
-function tick(){
+settingsBtn.addEventListener(
+"touchend",
+cancelPress
+);
+
+settingsBtn.addEventListener(
+"mouseup",
+cancelPress
+);
+
+settingsBtn.addEventListener(
+"mouseleave",
+cancelPress
+);
+
+function startPress(){
+
+pressTimer =
+setTimeout(()=>{
+
+toggleTeacherMode();
+
+},3000);
+
+}
+
+function cancelPress(){
+
+clearTimeout(
+pressTimer
+);
+
+}
+
+function toggleTeacherMode(){
 
 if(
-video.readyState ===
-video.HAVE_ENOUGH_DATA
+teacherView.style.display ===
+"block"
 ){
 
-canvas.width =
-video.videoWidth;
+teacherView.style.display =
+"none";
 
-canvas.height =
-video.videoHeight;
-
-ctx.drawImage(
-video,
-0,
-0
+speak(
+"児童モード"
 );
-
-const imageData =
-ctx.getImageData(
-0,
-0,
-canvas.width,
-canvas.height
-);
-
-const code =
-jsQR(
-imageData.data,
-canvas.width,
-canvas.height
-);
-
-if(code){
-
-try{
-
-const imported =
-JSON.parse(
-code.data
-);
-
-schedule =
-imported;
-
-saveSchedule();
-
-renderSchedule();
-
-alert(
-"設定を読み込みました"
-);
-
-video.srcObject
-.getTracks()
-.forEach(
-track =>
-track.stop()
-);
-
-return;
 
 }
-catch(e){
+else{
 
-alert(
-"QRデータが正しくありません"
+teacherView.style.display =
+"block";
+
+speak(
+"先生モード"
 );
 
 }
 
 }
-
-}
-
-requestAnimationFrame(
-tick
-);
-
-}
-
-tick();
 
 }
