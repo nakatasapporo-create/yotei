@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+  <title>みえるスケジュール</title>
+  <meta name="theme-color" content="#4CAF50">
+  <!-- SortableJS の読み込み -->
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
+  <style>
+    /* =================================
+       共通設定 & ユニバーサルデザイン
+       ================================= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      background: #f0f4f8;
+      color: #2c3e50;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-touch-callout: none;
+      overflow-x: hidden;
+    }
+
+    body {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* =================================
+       ヘッダー
+       ================================= */
+    header {
+      position: relative;
+      background: #4CAF50;
+      color: #fff;
+      padding: 18px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    header h1 {
+      font-size: 2.2rem;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    }
+
+    /* 長押しフィードバック用アニメーション付き設定ボタン */
+    #settingsBtn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      width: 65px;
+      height: 65px;
+      border: 4px solid #fff;
+      border-radius: 50%;
+      background: #eafaf1;
+      font-size: 2.2rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      transition: background 0.3s, transform 0.1s, border-color 0.3s;
+      outline: none;
+      touch-action: manipulation;
+    }
+
+    /* 長押し中にクラス付与して視覚的フィードバック */
+    #settingsBtn.pressing {
+      background: #ffd54f !important;
+      border-color: #ff9800;
+      animation: spin 3s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    /* =================================
+       メインレイアウト
+       ================================= */
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    /* =================================
+       児童画面 (First-Then: いま / つぎ)
+       ================================= */
+    #studentView {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .now-next {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* 「いま」「つぎ」のラベル。一目で判別できるよう色分け */
+    .panel h2 {
+      font-size: 2.4rem;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 900;
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    .panel:nth-child(1) h2 {
+      color: #e53935; /* いま：注意を引く赤 */
+      background: #ffebee;
+    }
+
+    .panel:nth-child(2) h2 {
+      color: #1e88e5; /* つぎ：安心感を与える青 */
+      background: #e3f2fd;
+    }
+
+    /* カードデザイン */
+    .card {
+      background: #fff;
+      border-radius: 30px;
+      padding: 20px;
+      min-height: 380px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+      border: 6px solid #fff;
+      transition: border-color 0.3s;
+    }
+
+    /* 「いま」のカードを目立たせる */
+    .panel:nth-child(1) .card {
+      border-color: #ffcdd2;
+      box-shadow: 0 10px 28px rgba(229, 57, 53, 0.15);
+    }
+
+    .card .image-container {
+      width: 100%;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fafbfc;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 15px;
+      position: relative;
+    }
+
+    .card img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .card p {
+      font-size: 2.6rem;
+      font-weight: bold;
+      text-align: center;
+      color: #111;
+      word-wrap: break-word;
+      width: 100%;
+    }
+
+    /* =================================
+       タイマー表示
+       ================================= */
+    #timerSection {
+      background: #fff;
+      padding: 15px;
+      border-radius: 24px;
+      box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+
+    #timerBar {
+      height: 48px;
+      background: #e0e0e0;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #timerProgress {
+      width: 100%;
+      height: 100%;
+      background: #4CAF50; /* 通常は緑 */
+      transition: width 1s linear, background-color 0.5s;
+    }
+
+    /* 警告状態（あと1分）の時 */
+    body.warning #timerProgress {
+      background: #ff9800; /* オレンジ */
+    }
+
+    /* 終了状態の時 */
+    body.finished #timerProgress {
+      background: #f44336; /* 赤 */
+    }
+
+    #timerText {
+      font-size: 4.5rem;
+      font-weight: 900;
+      text-align: center;
+      margin-top: 10px;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 2px;
+    }
+
+    /* 全体的なアラート背景変化 */
+    body.warning {
+      background: #fff9db;
+    }
+    body.finished {
+      background: #ffe3e3;
+    }
+
+    /* =================================
+       操作ボタン
+       ================================= */
+    #controls {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    #controls button {
+      flex: 1;
+      min-width: 180px;
+      font-size: 2.2rem;
+      padding: 20px 10px;
+      border: none;
+      border-radius: 24px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+      transition: transform 0.1s, opacity 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    #controls button:active {
+      transform: scale(0.95);
+    }
+
+    #startBtn {
+      background: #4CAF50;
+      color: #fff;
+    }
+
+    #pauseBtn {
+      background: #ffd54f;
+      color: #333;
+    }
+
+    #nextBtn {
+      background: #2196F3;
+      color: #fff;
+    }
+
+    /* 非活性状態のボタン */
+    #controls button:disabled {
+      background: #ccc;
+      color: #888;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+      opacity: 0.6;
+    }
+
+    /* =================================
+       教員（せんせい）モード
+       ================================= */
+    #teacherView {
+      display: none; /* 初期状態は非表示 */
+      background: #fff;
+      padding: 25px;
+      border-radius: 24px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      margin-top: 20px;
+      border: 4px solid #673AB7;
+    }
+
+    #teacherView h2 {
+      margin-bottom: 20px;
+      font-size: 2.2rem;
+      color: #673AB7;
+      border-bottom: 3px solid #673AB7;
+      padding-bottom: 8px;
+    }
+
+    .teacherCard {
+      margin-bottom: 20px;
+    }
+
+    .teacherCard label {
+      display: block;
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #444;
+    }
+
+    .teacherCard input[type="text"],
+    .teacherCard input[type="number"] {
+      width: 100%;
+      padding: 16px;
+      font-size: 1.4rem;
+      border: 2px solid #ccc;
+      border-radius: 12px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .teacherCard input:focus {
+      border-color: #673AB7;
+    }
+
+    .teacherCard input[type="file"] {
+      display: block;
+      font-size: 1.1rem;
+      padding: 10px 0;
+    }
+
+    #addCardBtn {
+      width: 100%;
+      padding: 18px;
+      font-size: 1.8rem;
+      font-weight: bold;
+      border: none;
+      border-radius: 16px;
+      background: #673AB7;
+      color: #fff;
+      margin-bottom: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(103, 58, 183, 0.3);
+    }
+
+    #addCardBtn:active {
+      transform: scale(0.98);
+    }
+
+    .help {
+      margin-bottom: 12px;
+      color: #666;
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* 登録カードリスト */
+    #scheduleList {
+      list-style: none;
+      margin-bottom: 25px;
+    }
+
+    #scheduleList li {
+      background: #f1f3f9;
+      padding: 18px;
+      margin-bottom: 12px;
+      border-radius: 16px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: grab;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 6px solid #673AB7;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+
+    .deleteBtn {
+      background: #e53935;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* 教員用システム操作ボタン */
+    .teacherButtons {
+      display: flex;
+      gap: 15px;
+      margin-top: 25px;
+    }
+
+    .teacherButtons button {
+      flex: 1;
+      padding: 18px;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    #resetBtn {
+      background: #e53935;
+      color: white;
+    }
+
+    #loadSampleBtn {
+      background: #009688;
+      color: white;
+    }
+
+    /* =================================
+       パスコード入力モーダル
+       ================================= */
+    #passwordModal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      backdrop-filter: blur(4px);
+    }
+
+    #passwordBox {
+      background: white;
+      padding: 35px;
+      border-radius: 30px;
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    }
+
+    #passwordBox h2 {
+      margin-bottom: 10px;
+      font-size: 1.8rem;
+      color: #333;
+    }
+
+    #passwordBox p {
+      font-size: 1.2rem;
+      color: #666;
+    }
+
+    #passwordInput {
+      width: 100%;
+      padding: 16px;
+      font-size: 2.2rem;
+      text-align: center;
+      margin-top: 20px;
+      margin-bottom: 25px;
+      border: 3px solid #ccc;
+      border-radius: 16px;
+      outline: none;
+    }
+
+    #passwordInput:focus {
+      border-color: #4CAF50;
+    }
+
+    .passwordButtons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .passwordButtons button {
+      flex: 1;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #passwordOkBtn {
+      background: #4CAF50;
+      color: white;
+    }
+
+    #passwordCancelBtn {
+      background: #999;
+      color: white;
+    }
+
+    /* 自作のアラート/確認用カスタムダイアログ */
+    #customAlert {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 10000;
+      justify-content: center;
+      align-items: center;
+      backdrop-filter: blur(2px);
+    }
+    .alert-box {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      width: 85%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .alert-box p {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .alert-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+    .alert-buttons button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .btn-confirm { background: #4CAF50; color: white; }
+    .btn-cancel { background: #999; color: white; }
+
+    /* =================================
+       タブレット縦向き・スマホ対応のメディアクエリ
+       ================================= */
+    @media (max-width: 900px) {
+      .now-next {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .card {
+        min-height: 280px;
+        padding: 15px;
+      }
+
+      .card .image-container {
+        height: 180px;
+      }
+
+      .card p {
+        font-size: 2.2rem;
+      }
+
+      #timerText {
+        font-size: 3.5rem;
+      }
+
+      #controls button {
+        min-width: 140px;
+        font-size: 1.8rem;
+        padding: 16px 10px;
+      }
+    }
+
+    /* ドラッグ時の見た目調整 */
+    .sortable-ghost {
+      opacity: 0.3;
+    }
+    .sortable-chosen {
+      background: #e3f2fd !important;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>みえるスケジュール</h1>
+    <button id="settingsBtn" aria-label="設定">⚙️</button>
+  </header>
+
+  <main>
+    <!-- =====================
+         児童（児童・生徒）画面
+         ===================== -->
+    <section id="studentView">
+      <div class="now-next">
+        <!-- いま -->
+        <div class="panel">
+          <h2>いま</h2>
+          <div class="card">
+            <div class="image-container" id="currentImageContainer">
+              <!-- 安定した共存用の構造 -->
+              <img id="currentImage" src="" alt="現在の活動" style="display:none;">
+              <div id="currentPlaceholder" style="width: 100%; height: 100%;"></div>
+            </div>
+            <p id="currentTitle">カードなし</p>
+          </div>
+        </div>
+
+        <!-- つぎ -->
+        <div class="panel">
+          <h2>つぎ</h2>
+          <div class="card">
+            <div class="image-container" id="nextImageContainer">
+              <!-- 安定した共存用の構造 -->
+              <img id="nextImage" src="" alt="次の活動" style="display:none;">
+              <div id="nextPlaceholder" style="width: 100%; height: 100%;"></div>
+            </div>
+            <p id="nextTitle">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- タイマー部分 -->
+      <section id="timerSection">
+        <div id="timerBar">
+          <div id="timerProgress"></div>
+        </div>
+        <div id="timerText">00:00</div>
+      </section>
+
+      <!-- 操作ボタン -->
+      <div id="controls">
+        <button id="startBtn">▶ スタート</button>
+        <button id="pauseBtn" disabled>⏸ とめる</button>
+        <button id="nextBtn">➡ つぎへ</button>
+      </div>
+    </section>
+
+    <!-- =====================
+         教員（せんせい）モード
+         ===================== -->
+    <section id="teacherView">
+      <h2>せんせいモード</h2>
+      
+      <div class="teacherCard">
+        <label for="cardName">カード名（例：トイレ、べんきょう）</label>
+        <input type="text" id="cardName" placeholder="例：トイレ">
+      </div>
+
+      <div class="teacherCard">
+        <label for="cardTime">時間（分）</label>
+        <input type="number" id="cardTime" min="1" max="120" value="5">
+      </div>
+
+      <div class="teacherCard">
+        <label for="imageInput">画像（えを えらぶ）※未選択時は自動で可愛いマークになります</label>
+        <input type="file" id="imageInput" accept="image/*">
+      </div>
+
+      <button id="addCardBtn">カード追加</button>
+
+      <hr style="margin-bottom: 20px; border: 1px solid #ddd;">
+
+      <h3>登録済みカード</h3>
+      <p class="help">👇 ドラッグ（長押しして動かす）で順番を変えられます</p>
+      
+      <ul id="scheduleList"></ul>
+
+      <div class="teacherButtons">
+        <button id="resetBtn">全削除</button>
+        <button id="loadSampleBtn">初期カード作成</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- =====================
+       パスコード入力モーダル
+       ===================== -->
+  <div id="passwordModal">
+    <div id="passwordBox">
+      <h2>せんせいモード</h2>
+      <p>4けたのパスコードを入力してください</p>
+      <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" id="passwordInput" placeholder="••••">
+      <div class="passwordButtons">
+        <button id="passwordOkBtn">OK</button>
+        <button id="passwordCancelBtn">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================
+       カスタムアラート / 確認画面 (iframe用の安全な代替)
+       ===================== -->
+  <div id="customAlert">
+    <div class="alert-box">
+      <p id="alertMessage">メッセージ</p>
+      <div class="alert-buttons">
+        <button id="alertConfirmBtn" class="btn-confirm">OK</button>
+        <button id="alertCancelBtn" class="btn-cancel" style="display:none;">キャンセル</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =====================
+       アプリケーション・ロジック
+       ===================== -->
+  <script>
+    const TEACHER_PASSWORD = "1234";
+
+    // スケジュールデータ
+    let schedule = JSON.parse(localStorage.getItem("schedule")) || [];
+    let currentIndex = 0;
+    let timerInterval = null;
+    let totalTime = 0;
+    let remainingTime = 0;
+    let isSpeechEnabled = false; // iOS対策：ユーザー操作後にtrueにする
+
+    // カスタムダイアログ用のコールバック
+    let alertCallback = null;
+
+    window.addEventListener("load", init);
+
+    function init() {
+      setupButtons();
+      renderSchedule();
+      updateDisplay();
+      enableSortable();
+      setupTeacherMode();
+    }
+
+    /* =================================
+       ボタン・イベント設定
+       ================================= */
+    function setupButtons() {
+      document.getElementById("addCardBtn")?.addEventListener("click", addCard);
+      document.getElementById("startBtn")?.addEventListener("click", () => {
+        enableSpeechEngine();
+        startTimer();
+      });
+      document.getElementById("pauseBtn")?.addEventListener("click", pauseTimer);
+      document.getElementById("nextBtn")?.addEventListener("click", () => {
+        enableSpeechEngine();
+        nextCard();
+      });
+      document.getElementById("resetBtn")?.addEventListener("click", () => {
+        showCustomConfirm("スケジュールをすべて削除しますか？", () => {
+          resetAll();
+        });
+      });
+      document.getElementById("loadSampleBtn")?.addEventListener("click", () => {
+        showCustomConfirm("おすすめの初期カードを登録しますか？", () => {
+          loadSampleCards();
+        });
+      });
+    }
+
+    /* =================================
+       iOS用の音声有効化トリガー
+       ================================= */
+    function enableSpeechEngine() {
+      if (!isSpeechEnabled && window.speechSynthesis) {
+        // 空のテキストを発話させて音声ロックを解除
+        const utterance = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(utterance);
+        isSpeechEnabled = true;
+      }
+    }
+
+    /* =================================
+       保存処理
+       ================================= */
+    function saveSchedule() {
+      localStorage.setItem("schedule", JSON.stringify(schedule));
+    }
+
+    /* =================================
+       カスタムダイアログ（iframe等での安定性向上）
+       ================================= */
+    function showCustomAlert(msg, callback = null) {
+      const alertModal = document.getElementById("customAlert");
+      const alertMsg = document.getElementById("alertMessage");
+      const okBtn = document.getElementById("alertConfirmBtn");
+      const cancelBtn = document.getElementById("alertCancelBtn");
+
+      alertMsg.textContent = msg;
+      cancelBtn.style.display = "none";
+      alertModal.style.display = "flex";
+
+      alertCallback = callback;
+      okBtn.onclick = () => {
+        alertModal.style.display = "none";
+        if (alertCallback) alertCallback();
+      };
+    }
+
+    function showCustomConfirm(msg, onConfirm, onCancel = null) {
+      const alertModal = document.getElementById("customAlert");
+      const alertMsg = document.getElementById("alertMessage");
+      const okBtn = document.getElementById("alertConfirmBtn");
+      const cancelBtn = document.getElementById("alertCancelBtn");
+
+      alertMsg.textContent = msg;
+      cancelBtn.style.display = "block";
+      alertModal.style.display = "flex";
+
+      okBtn.onclick = () => {
+        alertModal.style.display = "none";
+        if (onConfirm) onConfirm();
+      };
+      cancelBtn.onclick = () => {
+        alertModal.style.display = "none";
+        if (onCancel) onCancel();
+      };
+    }
+
+    /* =================================
+       画像がない場合のSVG自動生成（プレースホルダー）
+       ================================= */
+    function getPlaceholderSVG(text) {
+      // カードタイトルからハッシュ値を作成し、いくつかのバリエーションから色やアイコンを自動決定
+      const colors = [
+        { bg: "#E8F5E9", text: "#2E7D32", emoji: "🏫" }, // 学校、あさ
+        { bg: "#E3F2FD", text: "#1565C0", emoji: "✏️" }, // べんきょう
+        { bg: "#FFFDE7", text: "#F57F17", emoji: "🍱" }, // 給食
+        { bg: "#EDE7F6", text: "#4527A0", emoji: "🚻" }, // トイレ
+        { bg: "#F3E5F5", text: "#6A1B9A", emoji: "🏠" }, // かえり
+        { bg: "#E0F7FA", text: "#00838F", emoji: "🧸" }, // 自由、あそび
+        { bg: "#FFF3E0", text: "#E65100", emoji: "🏃" }, // 運動
+        { bg: "#FFE0B2", text: "#E65100", emoji: "🦷" }  // はみがき
+      ];
+
+      // 簡易ハッシュでインデックスを選ぶ
+      let hash = 0;
+      for (let i = 0; i < text.length; i++) {
+        hash += text.charCodeAt(i);
+      }
+      const select = colors[hash % colors.length];
+
+      // 特徴的な単語が含まれている場合、適した絵文字を設定
+      let emoji = select.emoji;
+      if (text.includes("トイレ") || text.includes("といれ")) emoji = "🚻";
+      else if (text.includes("べんきょう") || text.includes("がくしゅう")) emoji = "✏️";
+      else if (text.includes("ごはん") || text.includes("しょく") || text.includes("給食") || text.includes("ランチ")) emoji = "🍱";
+      else if (text.includes("あさ") || text.includes("かい")) emoji = "🌅";
+      else if (text.includes("かえり") || text.includes("おうち")) emoji = "🏠";
+      else if (text.includes("あそび") || text.includes("じゆう")) emoji = "🧸";
+      else if (text.includes("うた") || text.includes("おんがく")) emoji = "🎵";
+      else if (text.includes("たいいく") || text.includes("うんどう")) emoji = "🏃";
+      else if (text.includes("はみがき") || text.includes("は")) emoji = "🦷";
+
+      return `
+        <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <rect width="100" height="100" rx="20" fill="${select.bg}"/>
+          <text x="50" y="58" font-size="40" text-anchor="middle">${emoji}</text>
+        </svg>
+      `;
+    }
+
+    /* =================================
+       カード追加処理
+       ================================= */
+    function addCard() {
+      const name = document.getElementById("cardName").value.trim();
+      const minutes = parseInt(document.getElementById("cardTime").value);
+      const file = document.getElementById("imageInput").files[0];
+
+      if (!name) {
+        showCustomAlert("カードの名前をいれてください。");
+        return;
+      }
+      if (!minutes || minutes <= 0) {
+        showCustomAlert("正しい時間をいれてください。");
+        return;
+      }
+
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          schedule.push({
+            name: name,
+            time: minutes * 60,
+            image: e.target.result
+          });
+          saveSchedule();
+          renderSchedule();
+          clearInputs();
+          showCustomAlert("カードを追加しました！");
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // 画像がない場合
+        schedule.push({
+          name: name,
+          time: minutes * 60,
+          image: "" // 空にしてSVGプレースホルダーを使う
+        });
+        saveSchedule();
+        renderSchedule();
+        clearInputs();
+        showCustomAlert("カードを追加しました！");
+      }
+    }
+
+    function clearInputs() {
+      document.getElementById("cardName").value = "";
+      document.getElementById("cardTime").value = 5;
+      document.getElementById("imageInput").value = "";
+    }
+
+    /* =================================
+       一覧表示 (先生モード用)
+       ================================= */
+    function renderSchedule() {
+      const list = document.getElementById("scheduleList");
+      if (!list) return;
+
+      list.innerHTML = "";
+      schedule.forEach((item, index) => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+          <span>${item.name} (${item.time / 60}分)</span>
+          <button class="deleteBtn" data-index="${index}">さくじょ</button>
+        `;
+        list.appendChild(li);
+      });
+
+      document.querySelectorAll(".deleteBtn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const index = parseInt(e.target.dataset.index);
+          showCustomConfirm(`「${schedule[index].name}」のカードをさくじょしますか？`, () => {
+            schedule.splice(index, 1);
+            saveSchedule();
+            renderSchedule();
+          });
+        });
+      });
+
+      updateDisplay();
+    }
+
+    /* =================================
+       初期カードの読み込み
+       ================================= */
+    function loadSampleCards() {
+      schedule = [
+        { name: "あさのかい", time: 300, image: "" },
+        { name: "べんきょう", time: 900, image: "" },
+        { name: "トイレ", time: 300, image: "" },
+        { name: "きゅうしょく", time: 1800, image: "" },
+        { name: "かえりのかい", time: 300, image: "" }
+      ];
+      saveSchedule();
+      renderSchedule();
+    }
+
+    /* =================================
+       全削除
+       ================================= */
+    function resetAll() {
+      schedule = [];
+      currentIndex = 0;
+      saveSchedule();
+      renderSchedule();
+      clearInterval(timerInterval);
+      timerInterval = null;
+      document.body.classList.remove("warning", "finished");
+      updateDisplay();
+      updateTimerDisplay(0, 0);
+    }
+
+    /* =================================
+       表示アップデート (First-Then 表示)
+       ================================= */
+    function updateDisplay() {
+      const currentTitle = document.getElementById("currentTitle");
+      const currentImg = document.getElementById("currentImage");
+      const currentPlaceholder = document.getElementById("currentPlaceholder");
+
+      const nextTitle = document.getElementById("nextTitle");
+      const nextImg = document.getElementById("nextImage");
+      const nextPlaceholder = document.getElementById("nextPlaceholder");
+
+      if (schedule.length === 0) {
+        currentTitle.textContent = "カードなし";
+        nextTitle.textContent = "-";
+        
+        currentImg.style.display = "none";
+        currentPlaceholder.style.display = "block";
+        currentPlaceholder.innerHTML = getPlaceholderSVG("なし");
+        
+        nextImg.style.display = "none";
+        nextPlaceholder.style.display = "block";
+        nextPlaceholder.innerHTML = getPlaceholderSVG("なし");
+        return;
+      }
+
+      if (currentIndex >= schedule.length) {
+        currentIndex = 0;
+      }
+
+      const current = schedule[currentIndex];
+      currentTitle.textContent = current.name;
+
+      if (current.image) {
+        currentImg.src = current.image;
+        currentImg.style.display = "block";
+        currentPlaceholder.style.display = "none";
+      } else {
+        currentImg.style.display = "none";
+        currentPlaceholder.style.display = "block";
+        currentPlaceholder.innerHTML = getPlaceholderSVG(current.name);
+      }
+
+      const next = schedule[currentIndex + 1];
+      if (next) {
+        nextTitle.textContent = next.name;
+        if (next.image) {
+          nextImg.src = next.image;
+          nextImg.style.display = "block";
+          nextPlaceholder.style.display = "none";
+        } else {
+          nextImg.style.display = "none";
+          nextPlaceholder.style.display = "block";
+          nextPlaceholder.innerHTML = getPlaceholderSVG(next.name);
+        }
+      } else {
+        nextTitle.textContent = "おわり";
+        nextImg.style.display = "none";
+        nextPlaceholder.style.display = "block";
+        nextPlaceholder.innerHTML = `
+          <svg viewBox="0 0 100 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" rx="20" fill="#E8F5E9"/>
+            <text x="50" y="58" font-size="40" text-anchor="middle">👑</text>
+          </svg>
+        `;
+      }
+    }
+
+    /* =================================
+       タイマーシステム
+       ================================= */
+    function startTimer() {
+      if (schedule.length === 0) {
+        showCustomAlert("カードがありません。せんせいモードでカードをつくってね。");
+        return;
+      }
+
+      clearInterval(timerInterval);
+      document.body.classList.remove("warning", "finished");
+
+      // すでに開始して一時停止していた場合は途中から再開、そうでなければ最初から
+      if (remainingTime <= 0 || remainingTime > schedule[currentIndex].time) {
+        totalTime = schedule[currentIndex].time;
+        remainingTime = totalTime;
+      }
+
+      updateTimerDisplay(remainingTime, totalTime);
+      speak("「" + schedule[currentIndex].name + "」をはじめます。");
+
+      document.getElementById("startBtn").disabled = true;
+      document.getElementById("pauseBtn").disabled = false;
+
+      timerInterval = setInterval(() => {
+        remainingTime--;
+        updateTimerDisplay(remainingTime, totalTime);
+
+        // 残り1分の警告
+        if (remainingTime === 60) {
+          document.body.classList.add("warning");
+          speak("あと1分です。");
+        }
+
+        // 時間終了
+        if (remainingTime <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          document.body.classList.remove("warning");
+          document.body.classList.add("finished");
+          speak("「" + schedule[currentIndex].name + "」がおわりました。");
+
+          document.getElementById("startBtn").disabled = false;
+          document.getElementById("pauseBtn").disabled = true;
+
+          setTimeout(() => {
+            document.body.classList.remove("finished");
+            nextCard();
+          }, 2000);
+        }
+      }, 1000);
+    }
+
+    function pauseTimer() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      document.getElementById("startBtn").disabled = false;
+      document.getElementById("pauseBtn").disabled = true;
+      speak("タイマーをとめました。");
+    }
+
+    function updateTimerDisplay(remTime, totTime) {
+      const timerText = document.getElementById("timerText");
+      const timerProgress = document.getElementById("timerProgress");
+
+      const min = Math.floor(remTime / 60);
+      const sec = remTime % 60;
+
+      // 分と秒の連結を安全かつ正確に修正
+      timerText.textContent = String(min).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+
+      const percent = totTime > 0 ? (remTime / totTime) * 100 : 100;
+      timerProgress.style.width = percent + "%";
+    }
+
+    /* =================================
+       次のスケジュールカードへ進む
+       ================================= */
+    function nextCard() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      remainingTime = 0;
+      document.body.classList.remove("warning", "finished");
+      document.getElementById("startBtn").disabled = false;
+      document.getElementById("pauseBtn").disabled = true;
+
+      if (currentIndex < schedule.length - 1) {
+        currentIndex++;
+        updateDisplay();
+        updateTimerDisplay(schedule[currentIndex].time, schedule[currentIndex].time);
+        speak("つぎは「" + schedule[currentIndex].name + "」です。");
+      } else {
+        speak("すべてのスケジュールがおわりました。よくがんばりました！");
+        showCustomAlert("ぜんぶ おわりました！よくがんばったね！");
+        currentIndex = 0;
+        updateDisplay();
+        updateTimerDisplay(0, 0);
+      }
+    }
+
+    /* =================================
+       音声読み上げ（Web Speech API）
+       ================================= */
+    function speak(text) {
+      if (!window.speechSynthesis) return;
+
+      const msg = new SpeechSynthesisUtterance(text);
+      msg.lang = "ja-JP";
+      msg.rate = 1.0; // 児童が聞き取りやすい自然な速度
+
+      speechSynthesis.cancel(); // 前の発声をキャンセルして最新を優先
+      speechSynthesis.speak(msg);
+    }
+
+    /* =================================
+       SortableJS によるドラッグ＆ドロップ並び替え
+       ================================= */
+    function enableSortable() {
+      const list = document.getElementById("scheduleList");
+      if (!list) return;
+
+      new Sortable(list, {
+        animation: 200,
+        delay: 150, // モバイルでのスクロールを考慮した長押し遅延
+        delayOnTouchOnly: true,
+        onEnd: function(evt) {
+          const moved = schedule.splice(evt.oldIndex, 1)[0];
+          schedule.splice(evt.newIndex, 0, moved);
+          saveSchedule();
+          renderSchedule();
+        }
+      });
+    }
+
+    /* =================================
+       教員（せんせい）モード切り替え & 長押し制御
+       ================================= */
+    function setupTeacherMode() {
+      const settingsBtn = document.getElementById("settingsBtn");
+      const modal = document.getElementById("passwordModal");
+      const passwordInput = document.getElementById("passwordInput");
+      const okBtn = document.getElementById("passwordOkBtn");
+      const cancelBtn = document.getElementById("passwordCancelBtn");
+      const teacherView = document.getElementById("teacherView");
+
+      if (!settingsBtn) return;
+
+      let pressTimer;
+
+      // マルチデバイス（タッチ・マウス両対応）の長押し検知
+      settingsBtn.addEventListener("mousedown", startPress);
+      settingsBtn.addEventListener("touchstart", (e) => {
+        // デフォルト動作をキャンセルして重複処理を防ぎつつイベント起動
+        if (e.cancelable) e.preventDefault();
+        startPress();
+      });
+
+      settingsBtn.addEventListener("mouseup", cancelPress);
+      settingsBtn.addEventListener("mouseleave", cancelPress);
+      settingsBtn.addEventListener("touchend", cancelPress);
+      settingsBtn.addEventListener("touchcancel", cancelPress);
+
+      function startPress() {
+        settingsBtn.classList.add("pressing");
+        pressTimer = setTimeout(() => {
+          settingsBtn.classList.remove("pressing");
+          modal.style.display = "flex";
+          passwordInput.value = "";
+          passwordInput.focus();
+        }, 3000); // 誤操作防止のため、きっちり3秒間の長押し
+      }
+
+      function cancelPress() {
+        settingsBtn.classList.remove("pressing");
+        clearTimeout(pressTimer);
+      }
+
+      // パスコード確認
+      okBtn.addEventListener("click", () => {
+        if (passwordInput.value === TEACHER_PASSWORD) {
+          modal.style.display = "none";
+          if (teacherView.style.display === "block") {
+            teacherView.style.display = "none";
+            speak("じどうモードにしました。");
+            // スケジュール表示の更新
+            renderSchedule();
+          } else {
+            teacherView.style.display = "block";
+            speak("せんせいモードにしました。");
+            // 教員用の入力ビューが見えるようにスムーズスクロール
+            setTimeout(() => {
+              teacherView.scrollIntoView({ behavior: "smooth" });
+            }, 100);
+          }
+        } else {
+          showCustomAlert("パスコードがちがいます。");
+          passwordInput.value = "";
+        }
+      });
+
+      cancelBtn.addEventListener("click", () => {
+        modal.style.display = "none";
+      });
+    }
+  </script>
+</body>
+</html>
